@@ -233,11 +233,11 @@ export default function Home() {
 
         <div className="heroGrid">
           <div className="heroCopy">
-            <p className="eyebrow">Private jet connections from NZNE</p>
+            <p className="eyebrow">Online booking system</p>
             <h1>Dairy Flat Air</h1>
             <p>
-              Search the rolling weekly timetable, reserve a seat, receive an invoice summary, and manage bookings for
-              the airline&apos;s Sydney, Rotorua, Great Barrier, Chatham Islands, and Tekapo services.
+              Search scheduled flights from Dairy Flat Airport, make a booking, view booking details, and cancel a
+              booking using the reference number.
             </p>
           </div>
 
