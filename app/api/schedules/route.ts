@@ -5,18 +5,23 @@ import { getDb } from "@/lib/mongodb";
 export const dynamic = "force-dynamic";
 
 async function bookingCounts(flights: Flight[]) {
-  const db = await getDb();
-  if (!db || flights.length === 0) return new Map<string, number>();
+  try {
+    const db = await getDb();
+    if (!db || flights.length === 0) return new Map<string, number>();
 
-  const rows = await db
-    .collection("bookings")
-    .aggregate<{ _id: string; seats: number }>([
-      { $match: { status: "confirmed", flightId: { $in: flights.map((flight) => flight.flightId) } } },
-      { $group: { _id: "$flightId", seats: { $sum: 1 } } }
-    ])
-    .toArray();
+    const rows = await db
+      .collection("bookings")
+      .aggregate<{ _id: string; seats: number }>([
+        { $match: { status: "confirmed", flightId: { $in: flights.map((flight) => flight.flightId) } } },
+        { $group: { _id: "$flightId", seats: { $sum: 1 } } }
+      ])
+      .toArray();
 
-  return new Map(rows.map((row) => [row._id, row.seats]));
+    return new Map(rows.map((row) => [row._id, row.seats]));
+  } catch (error) {
+    console.error("Unable to read booking counts", error);
+    return new Map<string, number>();
+  }
 }
 
 export async function GET(request: Request) {
@@ -40,20 +45,24 @@ export async function GET(request: Request) {
 
   const originCode = orig && isAirportCode(orig) ? orig : undefined;
   const destinationCode = dest && isAirportCode(dest) ? dest : undefined;
-  const db = await getDb();
   let flights: Flight[] = [];
 
-  if (db) {
-    flights = (await db
-      .collection<Flight>("schedules")
-      .find({
-        ...(originCode ? { origin: originCode as AirportCode } : {}),
-        ...(destinationCode ? { destination: destinationCode as AirportCode } : {}),
-        departureIso: { $gte: `${date1}T00:00:00`, $lte: `${date2}T23:59:59~` }
-      })
-      .sort({ departureIso: 1 })
-      .project({ _id: 0 })
-      .toArray()) as Flight[];
+  try {
+    const db = await getDb();
+    if (db) {
+      flights = (await db
+        .collection<Flight>("schedules")
+        .find({
+          ...(originCode ? { origin: originCode as AirportCode } : {}),
+          ...(destinationCode ? { destination: destinationCode as AirportCode } : {}),
+          departureIso: { $gte: `${date1}T00:00:00`, $lte: `${date2}T23:59:59~` }
+        })
+        .sort({ departureIso: 1 })
+        .project({ _id: 0 })
+        .toArray()) as Flight[];
+    }
+  } catch (error) {
+    console.error("Unable to read stored schedules", error);
   }
 
   if (flights.length === 0) {
