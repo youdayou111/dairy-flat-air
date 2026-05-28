@@ -189,9 +189,10 @@ export default function Home() {
       setLookupResults((items) =>
         items.map((item) => (item.bookingRef === data.booking.bookingRef ? { ...item, status: "cancelled" } : item))
       );
-      if (booking?.bookingRef === data.booking.bookingRef) {
-        setBooking({ ...booking, status: "cancelled" });
-      }
+      setBooking((current) => {
+        if (!current) return current;
+        return current.bookingRef === data.booking.bookingRef ? { ...current, status: "cancelled" } : current;
+      });
       await searchFlights(undefined, { keepBooking: true, keepSelected: true });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Something went wrong.");
@@ -300,7 +301,7 @@ export default function Home() {
               </div>
               <div className="routeLine">
                 <span>{flight.origin}</span>
-                <span aria-hidden="true">-></span>
+                <span aria-hidden="true">to</span>
                 <span>{flight.destination}</span>
               </div>
               <dl>
