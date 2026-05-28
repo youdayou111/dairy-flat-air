@@ -1,0 +1,3 @@
+AI statement
+
+I used OpenAI Codex as an assistant while creating this assignment. It helped interpret the assignment brief, scaffold a Next.js application, draft API route handlers, generate styling, and prepare deployment notes. I reviewed and accepted the generated code and remain responsible for the final submission.
